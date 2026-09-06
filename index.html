@@ -129,53 +129,93 @@
   </div>
 
 
-  <script>
+<script>
 
-    // Địa chỉ ESP32
-    // Sau này thay bằng địa chỉ thật của ESP32
-    const ESP32_IP = "192.168.1.100";
+  // ==============================
+  // SUPABASE
+  // ==============================
+
+  const SUPABASE_URL = "https://rxbdwqgfgwsfkssisnwb.supabase.co";
+
+  // Dán Publishable key của ní vào đây
+  const SUPABASE_KEY = "sb_publishable_y9qF9V8y0aIOGrNz8BwIEA_MTTrSvku";
 
 
-    function sendCommand(command) {
+  // ==============================
+  // GỬI LỆNH
+  // ==============================
 
-      console.log("Lệnh:", command);
+  async function sendCommand(command) {
 
-      // Hiển thị trạng thái
-      const status = document.getElementById("status");
+    console.log("Lệnh:", command);
 
-      if (command === "forward") {
-        status.innerText = "Tiến";
+    // Hiển thị trạng thái
+    const status = document.getElementById("status");
+
+    if (command === "forward") {
+      status.innerText = "Tiến";
+    }
+
+    else if (command === "backward") {
+      status.innerText = "Lùi";
+    }
+
+    else if (command === "left") {
+      status.innerText = "Rẽ trái";
+    }
+
+    else if (command === "right") {
+      status.innerText = "Rẽ phải";
+    }
+
+    else if (command === "stop") {
+      status.innerText = "Đang dừng";
+    }
+
+
+    // Gửi lệnh lên Supabase
+    try {
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/robot_commands`,
+        {
+          method: "POST",
+
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+
+          body: JSON.stringify({
+            command: command
+          })
+        }
+      );
+
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("Lỗi Supabase:", errorText);
+        status.innerText = "Lỗi gửi lệnh";
+        return;
       }
 
-      else if (command === "backward") {
-        status.innerText = "Lùi";
-      }
-
-      else if (command === "left") {
-        status.innerText = "Rẽ trái";
-      }
-
-      else if (command === "right") {
-        status.innerText = "Rẽ phải";
-      }
-
-      else if (command === "stop") {
-        status.innerText = "Đang dừng";
-      }
-
-
-      // Gửi lệnh tới ESP32
-      fetch(`http://${ESP32_IP}/control?cmd=${command}`)
-        .then(response => {
-          console.log("Đã gửi lệnh:", command);
-        })
-        .catch(error => {
-          console.log("Không kết nối được ESP32");
-        });
+      console.log("Đã gửi lệnh:", command);
 
     }
 
-  </script>
+    catch (error) {
+
+      console.log("Không kết nối được Supabase:", error);
+      status.innerText = "Lỗi kết nối";
+
+    }
+
+  }
+
+</script>
 
 </body>
 </html>
