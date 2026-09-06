@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Điều khiển ESP32</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #111827;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .status {
+      margin: 15px auto;
+      padding: 10px;
+      max-width: 350px;
+      background: #1f2937;
+      border-radius: 10px;
+    }
+
+    .control {
+      width: 300px;
+      margin: 30px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      height: 75px;
+      border: none;
+      border-radius: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      background: #2563eb;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    }
+
+    button:active {
+      transform: scale(0.93);
+    }
+
+    .stop {
+      background: #dc2626;
+    }
+
+    .empty {
+      visibility: hidden;
+    }
+
+    .camera {
+      width: 100%;
+      max-width: 500px;
+      height: 280px;
+      margin: 20px auto;
+      background: #000;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🤖 Điều khiển ESP32</h1>
+
+  <div class="status">
+    Trạng thái: <b id="status">Đang dừng</b>
+  </div>
+
+  <!-- KHU VỰC CAMERA -->
+  <div class="camera">
+    📷 CAMERA ESP32-S3
+  </div>
+
+  <!-- NÚT ĐIỀU KHIỂN -->
+  <div class="control">
+
+    <div class="empty"></div>
+
+    <button onclick="sendCommand('forward')">
+      ▲
+    </button>
+
+    <div class="empty"></div>
+
+
+    <button onclick="sendCommand('left')">
+      ◀
+    </button>
+
+    <button class="stop" onclick="sendCommand('stop')">
+      ■
+    </button>
+
+    <button onclick="sendCommand('right')">
+      ▶
+    </button>
+
+
+    <div class="empty"></div>
+
+    <button onclick="sendCommand('backward')">
+      ▼
+    </button>
+
+    <div class="empty"></div>
+
+  </div>
+
+
+  <script>
+
+    // Địa chỉ ESP32
+    // Sau này thay bằng địa chỉ thật của ESP32
+    const ESP32_IP = "192.168.1.100";
+
+
+    function sendCommand(command) {
+
+      console.log("Lệnh:", command);
+
+      // Hiển thị trạng thái
+      const status = document.getElementById("status");
+
+      if (command === "forward") {
+        status.innerText = "Tiến";
+      }
+
+      else if (command === "backward") {
+        status.innerText = "Lùi";
+      }
+
+      else if (command === "left") {
+        status.innerText = "Rẽ trái";
+      }
+
+      else if (command === "right") {
+        status.innerText = "Rẽ phải";
+      }
+
+      else if (command === "stop") {
+        status.innerText = "Đang dừng";
+      }
+
+
+      // Gửi lệnh tới ESP32
+      fetch(`http://${ESP32_IP}/control?cmd=${command}`)
+        .then(response => {
+          console.log("Đã gửi lệnh:", command);
+        })
+        .catch(error => {
+          console.log("Không kết nối được ESP32");
+        });
+
+    }
+
+  </script>
+
+</body>
+</html>
