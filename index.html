@@ -1,1302 +1,221 @@
-```html
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
-
-<title>ESP32 Robot Control</title>
-
-
-<style>
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-
-    -webkit-user-select: none;
-    user-select: none;
-
-    -webkit-touch-callout: none;
-}
-
-
-body {
-
-    background: #0b1120;
-
-    color: white;
-
-    width: 100vw;
-    height: 100vh;
-
-    overflow: hidden;
-
-    touch-action: none;
-}
-
-
-/* ============================= */
-/* KHUNG CHÍNH */
-/* ============================= */
-
-.main {
-
-    width: 100vw;
-    height: 100vh;
-
-    display: flex;
-
-    flex-direction: column;
-
-    padding: 10px;
-
-    gap: 10px;
-}
-
-
-/* ============================= */
-/* THANH TRÊN */
-/* ============================= */
-
-.top {
-
-    height: 42%;
-
-    display: flex;
-
-    gap: 10px;
-}
-
-
-/* ============================= */
-/* CAMERA */
-/* ============================= */
-
-.camera {
-
-    flex: 1;
-
-    background: #020617;
-
-    border: 2px solid #1e293b;
-
-    border-radius: 15px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    position: relative;
-
-    overflow: hidden;
-}
-
-
-.camera-text {
-
-    color: #64748b;
-
-    font-size: 18px;
-
-}
-
-
-.camera-label {
-
-    position: absolute;
-
-    top: 10px;
-    left: 12px;
-
-    background: rgba(0,0,0,0.6);
-
-    padding: 6px 10px;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-
-}
-
-
-/* ============================= */
-/* TRẠNG THÁI */
-/* ============================= */
-
-.status {
-
-    width: 180px;
-
-    background: #1e293b;
-
-    border-radius: 12px;
-
-    padding: 10px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 5px;
-}
-
-
-.status-title {
-
-    color: #94a3b8;
-
-    font-size: 13px;
-}
-
-
-#status {
-
-    font-size: 18px;
-
-    font-weight: bold;
-}
-
-
-/* ============================= */
-/* KHU VỰC ĐIỀU KHIỂN */
-/* ============================= */
-
-.bottom {
-
-    flex: 1;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: 5px 10px;
-}
-
-
-/* ============================= */
-/* CỤM JOYSTICK */
-/* ============================= */
-
-.joystick-area {
-
-    width: 45%;
-
-    height: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-}
-
-
-.joystick {
-
-    width: min(210px, 35vh);
-
-    height: min(210px, 35vh);
-
-    border-radius: 50%;
-
-    background:
-
-        radial-gradient(
-            circle,
-            #1e293b 0%,
-            #172033 55%,
-            #111827 100%
-        );
-
-    border: 3px solid #334155;
-
-    position: relative;
-
-    box-shadow:
-        inset 0 0 20px rgba(0,0,0,0.5),
-        0 5px 20px rgba(0,0,0,0.3);
-
-    touch-action: none;
-}
-
-
-/* vòng 8 hướng */
-
-.joystick::before {
-
-    content: "";
-
-    position: absolute;
-
-    inset: 15%;
-
-    border-radius: 50%;
-
-    border: 1px dashed #475569;
-
-    opacity: 0.5;
-}
-
-
-/* ============================= */
-/* NÚT JOYSTICK */
-/* ============================= */
-
-.knob {
-
-    width: 70px;
-
-    height: 70px;
-
-    border-radius: 50%;
-
-    background: #2563eb;
-
-    border: 4px solid #60a5fa;
-
-    position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    box-shadow:
-
-        0 5px 15px rgba(0,0,0,0.5),
-
-        inset 0 0 10px rgba(255,255,255,0.2);
-
-    transition: transform 0.05s linear;
-
-}
-
-
-/* ============================= */
-/* MŨI TÊN 8 HƯỚNG */
-/* ============================= */
-
-.direction {
-
-    position: absolute;
-
-    color: #64748b;
-
-    font-size: 18px;
-
-    font-weight: bold;
-}
-
-
-.north {
-
-    top: 5px;
-    left: 50%;
-
-    transform: translateX(-50%);
-}
-
-
-.south {
-
-    bottom: 5px;
-    left: 50%;
-
-    transform: translateX(-50%);
-}
-
-
-.west {
-
-    left: 7px;
-    top: 50%;
-
-    transform: translateY(-50%);
-}
-
-
-.east {
-
-    right: 7px;
-    top: 50%;
-
-    transform: translateY(-50%);
-}
-
-
-.northwest {
-
-    top: 17px;
-    left: 17px;
-}
-
-
-.northeast {
-
-    top: 17px;
-    right: 17px;
-}
-
-
-.southwest {
-
-    bottom: 17px;
-    left: 17px;
-}
-
-
-.southeast {
-
-    bottom: 17px;
-    right: 17px;
-}
-
-
-/* ============================= */
-/* CỤM NÚT PHỤ */
-/* ============================= */
-
-.functions {
-
-    width: 48%;
-
-    height: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 12px;
-}
-
-
-/* ============================= */
-/* GÓC CỔ */
-/* ============================= */
-
-.neck-box {
-
-    background: #1e293b;
-
-    border-radius: 15px;
-
-    padding: 12px;
-
-    text-align: center;
-}
-
-
-.neck-title {
-
-    color: #94a3b8;
-
-    font-size: 14px;
-
-    margin-bottom: 8px;
-}
-
-
-.neck-controls {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-}
-
-
-.neck-controls button {
-
-    width: 55px;
-    height: 55px;
-
-    border: none;
-
-    border-radius: 12px;
-
-    background: #334155;
-
-    color: white;
-
-    font-size: 28px;
-
-    font-weight: bold;
-}
-
-
-.neck-angle {
-
-    width: 75px;
-
-    font-size: 25px;
-
-    font-weight: bold;
-}
-
-
-/* ============================= */
-/* NÚT VẪY */
-/* ============================= */
-
-.wave-button {
-
-    height: 80px;
-
-    min-width: 140px;
-
-    border: none;
-
-    border-radius: 15px;
-
-    background: #7c3aed;
-
-    color: white;
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    box-shadow:
-        0 5px 12px rgba(0,0,0,0.3);
-}
-
-
-button:active {
-
-    transform: scale(0.94);
-}
-
-
-/* ============================= */
-/* MOBILE ĐỨNG */
-/* ============================= */
-
-@media (orientation: portrait) {
-
-    body::before {
-
-        content: "↻ Vui lòng xoay điện thoại nằm ngang";
-
-        position: fixed;
-
-        inset: 0;
-
-        z-index: 999;
-
-        background: #0b1120;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        text-align: center;
-
-        font-size: 22px;
-
-        font-weight: bold;
-
-        padding: 30px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Điều khiển ESP32</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
     }
 
-}
-
-
-/* ============================= */
-/* MÀN HÌNH NHỎ */
-/* ============================= */
-
-@media (max-height: 500px) {
-
-    .main {
-
-        padding: 6px;
-
-        gap: 6px;
+    body {
+      background: #111827;
+      color: white;
+      text-align: center;
+      padding: 20px;
     }
 
-    .top {
-
-        height: 43%;
+    h1 {
+      margin-bottom: 10px;
     }
 
     .status {
-
-        width: 140px;
-
-        padding: 6px;
+      margin: 15px auto;
+      padding: 10px;
+      max-width: 350px;
+      background: #1f2937;
+      border-radius: 10px;
     }
 
-    .status-title {
-
-        font-size: 11px;
+    .control {
+      width: 300px;
+      margin: 30px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
     }
 
-    #status {
-
-        font-size: 15px;
+    button {
+      height: 75px;
+      border: none;
+      border-radius: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      background: #2563eb;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
     }
 
-    .neck-box {
-
-        padding: 8px;
+    button:active {
+      transform: scale(0.93);
     }
 
-    .neck-controls button {
-
-        width: 45px;
-        height: 45px;
-
-        font-size: 22px;
+    .stop {
+      background: #dc2626;
     }
 
-    .neck-angle {
-
-        width: 60px;
-
-        font-size: 21px;
+    .empty {
+      visibility: hidden;
     }
 
-    .wave-button {
-
-        height: 65px;
-
-        min-width: 115px;
-
-        font-size: 16px;
+    .camera {
+      width: 100%;
+      max-width: 500px;
+      height: 280px;
+      margin: 20px auto;
+      background: #000;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
     }
-
-}
-
-</style>
-
+  </style>
 </head>
-
 
 <body>
 
+  <h1>🤖 Điều khiển ESP32</h1>
 
-<div class="main">
+  <div class="status">
+    Trạng thái: <b id="status">Đang dừng</b>
+  </div>
 
+  <!-- KHU VỰC CAMERA -->
+  <div class="camera">
+    📷 CAMERA ESP32-S3
+  </div>
 
-    <!-- ====================== -->
-    <!-- CAMERA -->
-    <!-- ====================== -->
+  <!-- NÚT ĐIỀU KHIỂN -->
+  <div class="control">
 
-    <div class="top">
+    <div class="empty"></div>
 
-        <div class="camera">
+    <button onclick="sendCommand('forward')">
+      ▲
+    </button>
 
-            <div class="camera-label">
-                📷 ESP32-S3 CAMERA
-            </div>
+    <div class="empty"></div>
 
-            <div class="camera-text">
-                CAMERA
-                <br>
-                Chưa kết nối
-            </div>
 
-        </div>
+    <button onclick="sendCommand('left')">
+      ◀
+    </button>
 
+    <button class="stop" onclick="sendCommand('stop')">
+      ■
+    </button>
 
-        <!-- TRẠNG THÁI -->
+    <button onclick="sendCommand('right')">
+      ▶
+    </button>
 
-        <div class="status">
 
-            <div class="status-title">
-                TRẠNG THÁI
-            </div>
+    <div class="empty"></div>
 
-            <div id="status">
-                Đang dừng
-            </div>
+    <button onclick="sendCommand('backward')">
+      ▼
+    </button>
 
-        </div>
+    <div class="empty"></div>
 
-    </div>
-
-
-
-    <!-- ====================== -->
-    <!-- ĐIỀU KHIỂN -->
-    <!-- ====================== -->
-
-    <div class="bottom">
-
-
-        <!-- JOYSTICK -->
-
-        <div class="joystick-area">
-
-            <div
-                class="joystick"
-                id="joystick"
-            >
-
-                <span class="direction north">
-                    ▲
-                </span>
-
-                <span class="direction south">
-                    ▼
-                </span>
-
-                <span class="direction west">
-                    ◀
-                </span>
-
-                <span class="direction east">
-                    ▶
-                </span>
-
-                <span class="direction northwest">
-                    ↖
-                </span>
-
-                <span class="direction northeast">
-                    ↗
-                </span>
-
-                <span class="direction southwest">
-                    ↙
-                </span>
-
-                <span class="direction southeast">
-                    ↘
-                </span>
-
-
-                <div
-                    class="knob"
-                    id="knob"
-                >
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- NÚT PHỤ -->
-
-        <div class="functions">
-
-
-            <!-- GÓC CỔ -->
-
-            <div class="neck-box">
-
-                <div class="neck-title">
-                    🦾 GÓC CỔ
-                </div>
-
-
-                <div class="neck-controls">
-
-                    <button onclick="changeNeck(-5)">
-                        −
-                    </button>
-
-
-                    <div class="neck-angle">
-
-                        <span id="neckAngle">
-                            100
-                        </span>°
-
-                    </div>
-
-
-                    <button onclick="changeNeck(5)">
-                        +
-                    </button>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- VẪY TAY -->
-
-            <button
-                class="wave-button"
-                onclick="sendCommand('wave')">
-
-                👋
-                <br>
-                VẪY TAY
-
-            </button>
-
-
-        </div>
-
-    </div>
-
-</div>
-
+  </div>
 
 
 <script>
 
+  // ==============================
+  // SUPABASE
+  // ==============================
 
-/* ================================= */
-/* SUPABASE */
-/* ================================= */
+  const SUPABASE_URL = "https://rxbdwqgfgwsfkssisnwb.supabase.co";
 
-const SUPABASE_URL =
-"https://rxbdwqgfgwsfkssisnwb.supabase.co";
-
-
-const SUPABASE_KEY =
-"sb_publishable_y9qF9V8y0aIOGrNz8BwIEA_MTTrSvku";
+  // Dán Publishable key của ní vào đây
+  const SUPABASE_KEY = "sb_publishable_y9qF9V8y0aIOGrNz8BwIEA_MTTrSvku";
 
 
+  // ==============================
+  // GỬI LỆNH
+  // ==============================
 
-/* ================================= */
-/* JOYSTICK */
-/* ================================= */
+  async function sendCommand(command) {
 
-const joystick =
-document.getElementById("joystick");
+    console.log("Lệnh:", command);
 
-const knob =
-document.getElementById("knob");
+    // Hiển thị trạng thái
+    const status = document.getElementById("status");
 
-const status =
-document.getElementById("status");
+    if (command === "forward") {
+      status.innerText = "Tiến";
+    }
 
+    else if (command === "backward") {
+      status.innerText = "Lùi";
+    }
 
-let joystickActive = false;
+    else if (command === "left") {
+      status.innerText = "Rẽ trái";
+    }
 
-let currentCommand = "stop";
+    else if (command === "right") {
+      status.innerText = "Rẽ phải";
+    }
 
-let lastCommand = "stop";
-
-
-/* ================================= */
-/* TỌA ĐỘ JOYSTICK */
-/* ================================= */
-
-function getDirection(x, y) {
-
-    const angle =
-        Math.atan2(y, x)
-        * 180 / Math.PI;
-
-
-    /*
-       0°   = Đông
-       45°  = Đông Nam
-       90°  = Nam
-       135° = Tây Nam
-       180° = Tây
-       -135 = Tây Bắc
-       -90  = Bắc
-       -45  = Đông Bắc
-    */
-
-
-    if (
-        angle >= -22.5 &&
-        angle < 22.5
-    )
-        return "east";
-
-
-    if (
-        angle >= 22.5 &&
-        angle < 67.5
-    )
-        return "southeast";
-
-
-    if (
-        angle >= 67.5 &&
-        angle < 112.5
-    )
-        return "south";
-
-
-    if (
-        angle >= 112.5 &&
-        angle < 157.5
-    )
-        return "southwest";
-
-
-    if (
-        angle >= 157.5 ||
-        angle < -157.5
-    )
-        return "west";
-
-
-    if (
-        angle >= -157.5 &&
-        angle < -112.5
-    )
-        return "northwest";
-
-
-    if (
-        angle >= -112.5 &&
-        angle < -67.5
-    )
-        return "north";
-
-
-    return "northeast";
-}
-
-
-
-/* ================================= */
-/* XỬ LÝ JOYSTICK */
-/* ================================= */
-
-function moveJoystick(clientX, clientY) {
-
-
-    const rect =
-        joystick.getBoundingClientRect();
-
-
-    const centerX =
-        rect.left + rect.width / 2;
-
-
-    const centerY =
-        rect.top + rect.height / 2;
-
-
-    let dx =
-        clientX - centerX;
-
-
-    let dy =
-        clientY - centerY;
-
-
-    const maxDistance =
-        rect.width / 2 - 38;
-
-
-    const distance =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
-        );
-
-
-    if (distance > maxDistance) {
-
-        dx =
-            dx / distance
-            * maxDistance;
-
-        dy =
-            dy / distance
-            * maxDistance;
-
+    else if (command === "stop") {
+      status.innerText = "Đang dừng";
     }
 
 
-    knob.style.transform =
-        `translate(
-            calc(-50% + ${dx}px),
-            calc(-50% + ${dy}px)
-        )`;
-
-
-    /*
-       Vùng chết ở giữa.
-       Tránh xe chạy khi tay chỉ chạm nhẹ.
-    */
-
-    if (distance < 20) {
-
-        return;
-
-    }
-
-
-    const direction =
-        getDirection(dx, dy);
-
-
-    currentCommand =
-        direction;
-
-
-    if (direction !== lastCommand) {
-
-        sendCommand(direction);
-
-        lastCommand =
-            direction;
-
-    }
-
-}
-
-
-
-/* ================================= */
-/* CHẠM JOYSTICK */
-/* ================================= */
-
-joystick.addEventListener(
-    "pointerdown",
-    function(e) {
-
-        e.preventDefault();
-
-        joystickActive = true;
-
-        joystick.setPointerCapture(
-            e.pointerId
-        );
-
-        moveJoystick(
-            e.clientX,
-            e.clientY
-        );
-
-    }
-);
-
-
-
-/* ================================= */
-/* KÉO JOYSTICK */
-/* ================================= */
-
-joystick.addEventListener(
-    "pointermove",
-    function(e) {
-
-        if (!joystickActive)
-            return;
-
-        e.preventDefault();
-
-        moveJoystick(
-            e.clientX,
-            e.clientY
-        );
-
-    }
-);
-
-
-
-/* ================================= */
-/* BUÔNG TAY */
-/* ================================= */
-
-function releaseJoystick() {
-
-    if (!joystickActive)
-        return;
-
-
-    joystickActive = false;
-
-
-    /*
-       Đưa nút joystick về giữa
-    */
-
-    knob.style.transform =
-        "translate(-50%, -50%)";
-
-
-    /*
-       QUAN TRỌNG:
-       BUÔNG TAY = DỪNG XE
-    */
-
-    currentCommand =
-        "stop";
-
-
-    sendCommand("stop");
-
-
-    lastCommand =
-        "stop";
-
-}
-
-
-joystick.addEventListener(
-    "pointerup",
-    releaseJoystick
-);
-
-
-joystick.addEventListener(
-    "pointercancel",
-    releaseJoystick
-);
-
-
-
-/* ================================= */
-/* GÓC CỔ */
-/* ================================= */
-
-let neckAngle = 100;
-
-
-function changeNeck(value) {
-
-
-    neckAngle += value;
-
-
-    if (neckAngle < 0)
-        neckAngle = 0;
-
-
-    if (neckAngle > 180)
-        neckAngle = 180;
-
-
-    document.getElementById(
-        "neckAngle"
-    ).innerText =
-        neckAngle;
-
-
-    sendNeckAngle(
-        neckAngle
-    );
-
-}
-
-
-
-/* ================================= */
-/* GỬI GÓC CỔ */
-/* ================================= */
-
-async function sendNeckAngle(angle) {
-
+    // Gửi lệnh lên Supabase
     try {
 
-        const response =
-            await fetch(
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/robot_commands`,
+        {
+          method: "POST",
 
-                `${SUPABASE_URL}/rest/v1/robot_commands`,
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
 
-                {
-
-                    method: "POST",
-
-                    headers: {
-
-                        "apikey":
-                            SUPABASE_KEY,
-
-                        "Authorization":
-                            `Bearer ${SUPABASE_KEY}`,
-
-                        "Content-Type":
-                            "application/json",
-
-                        "Prefer":
-                            "return=minimal"
-
-                    },
-
-                    body: JSON.stringify({
-
-                        command: "neck",
-
-                        value: angle
-
-                    })
-
-                }
-
-            );
-
-
-        if (!response.ok) {
-
-            console.log(
-                "Lỗi góc cổ:",
-                await response.text()
-            );
-
+          body: JSON.stringify({
+            command: command
+          })
         }
+      );
+
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("Lỗi Supabase:", errorText);
+        status.innerText = "Lỗi gửi lệnh";
+        return;
+      }
+
+      console.log("Đã gửi lệnh:", command);
 
     }
 
-    catch(error) {
+    catch (error) {
 
-        console.log(
-            "Lỗi kết nối:",
-            error
-        );
+      console.log("Không kết nối được Supabase:", error);
+      status.innerText = "Lỗi kết nối";
 
     }
 
-}
-
-
-
-/* ================================= */
-/* GỬI LỆNH */
-/* ================================= */
-
-async function sendCommand(command) {
-
-
-    console.log(
-        "COMMAND:",
-        command
-    );
-
-
-    /* HIỂN THỊ */
-
-    const names = {
-
-        north:
-            "⬆️ Tiến",
-
-        south:
-            "⬇️ Lùi",
-
-        east:
-            "➡️ Xoay phải",
-
-        west:
-            "⬅️ Xoay trái",
-
-        northeast:
-            "↗️ Đông Bắc",
-
-        northwest:
-            "↖️ Tây Bắc",
-
-        southeast:
-            "↘️ Đông Nam",
-
-        southwest:
-            "↙️ Tây Nam",
-
-        wave:
-            "👋 Đang vẫy tay",
-
-        stop:
-            "⏹ Đang dừng"
-
-    };
-
-
-    status.innerText =
-        names[command] || command;
-
-
-    try {
-
-        const response =
-            await fetch(
-
-                `${SUPABASE_URL}/rest/v1/robot_commands`,
-
-                {
-
-                    method: "POST",
-
-                    headers: {
-
-                        "apikey":
-                            SUPABASE_KEY,
-
-                        "Authorization":
-                            `Bearer ${SUPABASE_KEY}`,
-
-                        "Content-Type":
-                            "application/json",
-
-                        "Prefer":
-                            "return=minimal"
-
-                    },
-
-                    body: JSON.stringify({
-
-                        command: command
-
-                    })
-
-                }
-
-            );
-
-
-        if (!response.ok) {
-
-            console.log(
-                "Lỗi Supabase:",
-                await response.text()
-            );
-
-            status.innerText =
-                "❌ Lỗi gửi lệnh";
-
-        }
-
-    }
-
-    catch(error) {
-
-        console.log(
-            "Lỗi kết nối:",
-            error
-        );
-
-        status.innerText =
-            "❌ Lỗi kết nối";
-
-    }
-
-}
+  }
 
 </script>
 
-
 </body>
-
 </html>
-```
-
