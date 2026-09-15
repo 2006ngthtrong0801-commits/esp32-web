@@ -1,221 +1,1100 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="viewport"
+        content="width=device-width,
+        initial-scale=1.0,
+        maximum-scale=1.0,
+        user-scalable=no">
 
   <title>Điều khiển ESP32</title>
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
       background: #111827;
       color: white;
-      text-align: center;
-      padding: 20px;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
+    /* =========================
+       KHUNG CHÍNH
+    ========================= */
 
-    .status {
-      margin: 15px auto;
+    .main {
+      width: 100vw;
+      height: 100vh;
+
+      display: flex;
+      flex-direction: column;
+
       padding: 10px;
-      max-width: 350px;
-      background: #1f2937;
-      border-radius: 10px;
+
+      gap: 10px;
     }
 
-    .control {
-      width: 300px;
-      margin: 30px auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    button {
-      height: 75px;
-      border: none;
-      border-radius: 15px;
-      font-size: 28px;
-      font-weight: bold;
-      color: white;
-      background: #2563eb;
-      cursor: pointer;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
-    }
-
-    button:active {
-      transform: scale(0.93);
-    }
-
-    .stop {
-      background: #dc2626;
-    }
-
-    .empty {
-      visibility: hidden;
-    }
+    /* =========================
+       CAMERA
+    ========================= */
 
     .camera {
       width: 100%;
-      max-width: 500px;
-      height: 280px;
-      margin: 20px auto;
+      height: 48%;
+
       background: #000;
+
       border-radius: 15px;
+
+      overflow: hidden;
+
+      border: 2px solid #374151;
+
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #aaa;
+
+      position: relative;
     }
+
+    .camera img {
+      width: 100%;
+      height: 100%;
+
+      object-fit: contain;
+
+      display: block;
+    }
+
+    .camera-title {
+      position: absolute;
+
+      top: 8px;
+      left: 10px;
+
+      background: rgba(0,0,0,0.6);
+
+      padding: 5px 10px;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+
+      z-index: 2;
+    }
+
+
+    /* =========================
+       KHU ĐIỀU KHIỂN
+    ========================= */
+
+    .bottom {
+      flex: 1;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-around;
+
+      gap: 20px;
+    }
+
+
+    /* =========================
+       JOYSTICK
+    ========================= */
+
+    .joystick {
+      width: min(42vw, 300px);
+      height: min(42vw, 300px);
+
+      min-width: 180px;
+      min-height: 180px;
+
+      max-width: 300px;
+      max-height: 300px;
+
+      background: #1f2937;
+
+      border: 4px solid #374151;
+
+      border-radius: 50%;
+
+      position: relative;
+
+      touch-action: none;
+
+      box-shadow:
+        inset 0 0 20px rgba(0,0,0,0.5),
+        0 5px 15px rgba(0,0,0,0.4);
+    }
+
+
+    /* ĐƯỜNG CHIA 8 HƯỚNG */
+
+    .joystick::before {
+      content: "";
+
+      position: absolute;
+
+      width: 4px;
+      height: 80%;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      background: #374151;
+    }
+
+    .joystick::after {
+      content: "";
+
+      position: absolute;
+
+      width: 80%;
+      height: 4px;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      background: #374151;
+    }
+
+
+    /* =========================
+       NÚT JOYSTICK
+    ========================= */
+
+    .knob {
+
+      position: absolute;
+
+      width: 35%;
+      height: 35%;
+
+      min-width: 60px;
+      min-height: 60px;
+
+      max-width: 100px;
+      max-height: 100px;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      background: #2563eb;
+
+      border: 4px solid #60a5fa;
+
+      border-radius: 50%;
+
+      box-shadow:
+        0 5px 15px rgba(0,0,0,0.5);
+
+      pointer-events: none;
+    }
+
+
+    /* =========================
+       THÔNG TIN
+    ========================= */
+
+    .info {
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      gap: 12px;
+
+      min-width: 150px;
+    }
+
+    h1 {
+
+      font-size: 22px;
+
+      margin-bottom: 5px;
+    }
+
+
+    .status {
+
+      padding: 10px 18px;
+
+      background: #1f2937;
+
+      border-radius: 10px;
+
+      border: 1px solid #374151;
+
+      font-size: 15px;
+    }
+
+
+    .online {
+
+      width: 10px;
+      height: 10px;
+
+      background: #22c55e;
+
+      display: inline-block;
+
+      border-radius: 50%;
+
+      margin-right: 6px;
+    }
+
+
+    /* =========================
+       ĐIỆN THOẠI XOAY NGANG
+    ========================= */
+
+    @media (max-width: 600px) {
+
+      .main {
+        padding: 6px;
+        gap: 6px;
+      }
+
+      .camera {
+        height: 43%;
+      }
+
+      .bottom {
+        gap: 5px;
+      }
+
+      .info {
+        min-width: 100px;
+      }
+
+      h1 {
+        font-size: 15px;
+      }
+
+      .status {
+        font-size: 12px;
+        padding: 8px;
+      }
+
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
-  <h1>🤖 Điều khiển ESP32</h1>
 
-  <div class="status">
-    Trạng thái: <b id="status">Đang dừng</b>
-  </div>
+<div class="main">
 
-  <!-- KHU VỰC CAMERA -->
+
+  <!-- ==================================
+       CAMERA ESP32-S3-CAM
+  =================================== -->
+
   <div class="camera">
-    📷 CAMERA ESP32-S3
-  </div>
 
-  <!-- NÚT ĐIỀU KHIỂN -->
-  <div class="control">
+    <div class="camera-title">
+      📷 CAMERA ESP32-S3
+    </div>
 
-    <div class="empty"></div>
-
-    <button onclick="sendCommand('forward')">
-      ▲
-    </button>
-
-    <div class="empty"></div>
-
-
-    <button onclick="sendCommand('left')">
-      ◀
-    </button>
-
-    <button class="stop" onclick="sendCommand('stop')">
-      ■
-    </button>
-
-    <button onclick="sendCommand('right')">
-      ▶
-    </button>
-
-
-    <div class="empty"></div>
-
-    <button onclick="sendCommand('backward')">
-      ▼
-    </button>
-
-    <div class="empty"></div>
+    <img
+      id="camera"
+      src="http://10.81.30.240/stream"
+      alt="Camera ESP32-S3">
 
   </div>
+
+
+
+  <!-- ==================================
+       ĐIỀU KHIỂN
+  =================================== -->
+
+  <div class="bottom">
+
+
+    <!-- JOYSTICK -->
+
+    <div
+      class="joystick"
+      id="joystick">
+
+      <div
+        class="knob"
+        id="knob">
+      </div>
+
+    </div>
+
+
+
+    <!-- THÔNG TIN -->
+
+    <div class="info">
+
+      <h1>
+        🤖 ESP32 ROBOT
+      </h1>
+
+      <div class="status">
+
+        <span class="online"></span>
+
+        Trạng thái:
+
+        <b id="status">
+          Đang dừng
+        </b>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+</div>
+
 
 
 <script>
 
-  // ==============================
-  // SUPABASE
-  // ==============================
 
-  const SUPABASE_URL = "https://rxbdwqgfgwsfkssisnwb.supabase.co";
+// ==================================================
+// SUPABASE
+// ==================================================
 
-  // Dán Publishable key của ní vào đây
-  const SUPABASE_KEY = "sb_publishable_y9qF9V8y0aIOGrNz8BwIEA_MTTrSvku";
-
-
-  // ==============================
-  // GỬI LỆNH
-  // ==============================
-
-  async function sendCommand(command) {
-
-    console.log("Lệnh:", command);
-
-    // Hiển thị trạng thái
-    const status = document.getElementById("status");
-
-    if (command === "forward") {
-      status.innerText = "Tiến";
-    }
-
-    else if (command === "backward") {
-      status.innerText = "Lùi";
-    }
-
-    else if (command === "left") {
-      status.innerText = "Rẽ trái";
-    }
-
-    else if (command === "right") {
-      status.innerText = "Rẽ phải";
-    }
-
-    else if (command === "stop") {
-      status.innerText = "Đang dừng";
-    }
+const SUPABASE_URL =
+  "https://rxbdwqgfgwsfkssisnwb.supabase.co";
 
 
-    // Gửi lệnh lên Supabase
-    try {
-
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/robot_commands`,
-        {
-          method: "POST",
-
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
-
-          body: JSON.stringify({
-            command: command
-          })
-        }
-      );
+// Publishable Key của ní
+const SUPABASE_KEY =
+  "sb_publishable_y9qF9V8y0aIOGrNz8BwIEA_MTTrSvku";
 
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log("Lỗi Supabase:", errorText);
-        status.innerText = "Lỗi gửi lệnh";
-        return;
+
+// ==================================================
+// JOYSTICK
+// ==================================================
+
+const joystick =
+  document.getElementById("joystick");
+
+const knob =
+  document.getElementById("knob");
+
+const status =
+  document.getElementById("status");
+
+
+// Hướng hiện tại
+let currentDirection = "stop";
+
+// Đang chạm joystick
+let touching = false;
+
+
+
+// ==================================================
+// GỬI LỆNH SUPABASE
+// ==================================================
+
+async function sendCommand(command) {
+
+  console.log("Lệnh:", command);
+
+
+  // ------------------------------
+  // HIỂN THỊ TRẠNG THÁI
+  // ------------------------------
+
+  const names = {
+
+    "forward":
+      "Tiến",
+
+    "backward":
+      "Lùi",
+
+    "left":
+      "Quay trái",
+
+    "right":
+      "Quay phải",
+
+    "north-east":
+      "Đông Bắc",
+
+    "north-west":
+      "Tây Bắc",
+
+    "south-east":
+      "Đông Nam",
+
+    "south-west":
+      "Tây Nam",
+
+    "stop":
+      "Đang dừng"
+
+  };
+
+
+  status.innerText =
+    names[command] || command;
+
+
+
+  // ------------------------------
+  // GỬI SUPABASE
+  // ------------------------------
+
+  try {
+
+    const response = await fetch(
+
+      `${SUPABASE_URL}/rest/v1/robot_commands`,
+
+      {
+
+        method: "POST",
+
+        headers: {
+
+          "apikey":
+            SUPABASE_KEY,
+
+          "Authorization":
+            `Bearer ${SUPABASE_KEY}`,
+
+          "Content-Type":
+            "application/json",
+
+          "Prefer":
+            "return=minimal"
+
+        },
+
+        body: JSON.stringify({
+
+          command: command
+
+        })
+
       }
 
-      console.log("Đã gửi lệnh:", command);
+    );
+
+
+    if (!response.ok) {
+
+      const errorText =
+        await response.text();
+
+      console.log(
+        "Lỗi Supabase:",
+        errorText
+      );
+
+      status.innerText =
+        "Lỗi gửi lệnh";
+
+      return;
 
     }
 
-    catch (error) {
 
-      console.log("Không kết nối được Supabase:", error);
-      status.innerText = "Lỗi kết nối";
-
-    }
+    console.log(
+      "Đã gửi:",
+      command
+    );
 
   }
 
+
+  catch (error) {
+
+    console.log(
+      "Không kết nối Supabase:",
+      error
+    );
+
+    status.innerText =
+      "Lỗi kết nối";
+
+  }
+
+}
+
+
+
+// ==================================================
+// CHỈ GỬI KHI HƯỚNG THAY ĐỔI
+// ==================================================
+
+function changeDirection(direction) {
+
+  if (
+    direction === currentDirection
+  ) {
+
+    return;
+
+  }
+
+
+  currentDirection =
+    direction;
+
+
+  sendCommand(
+    direction
+  );
+
+}
+
+
+
+// ==================================================
+// STOP
+// ==================================================
+
+function stopCar() {
+
+  if (
+    currentDirection !== "stop"
+  ) {
+
+    currentDirection =
+      "stop";
+
+    sendCommand(
+      "stop"
+    );
+
+  }
+  else {
+
+    status.innerText =
+      "Đang dừng";
+
+  }
+
+
+  // Đưa nút về giữa
+
+  knob.style.left =
+    "50%";
+
+  knob.style.top =
+    "50%";
+
+}
+
+
+
+// ==================================================
+// TÍNH HƯỚNG JOYSTICK
+// ==================================================
+
+function calculateDirection(x, y) {
+
+
+  // Khoảng cách từ tâm
+
+  const distance =
+    Math.sqrt(
+      x * x +
+      y * y
+    );
+
+
+  // Vùng chết
+
+  const deadZone = 25;
+
+
+  if (
+    distance < deadZone
+  ) {
+
+    return "stop";
+
+  }
+
+
+  // Tính góc
+
+  let angle =
+    Math.atan2(
+      -y,
+      x
+    ) * 180 / Math.PI;
+
+
+  if (
+    angle < 0
+  ) {
+
+    angle += 360;
+
+  }
+
+
+
+  /*
+  
+               BẮC
+                ↑
+          ↖     |     ↗
+          
+     TÂY ←──────┼──────→ ĐÔNG
+          
+          ↙     |     ↘
+                ↓
+               NAM
+
+  */
+
+
+
+  // BẮC
+
+  if (
+    angle >= 67.5 &&
+    angle < 112.5
+  ) {
+
+    return "forward";
+
+  }
+
+
+  // TÂY BẮC ↖
+
+  if (
+    angle >= 112.5 &&
+    angle < 157.5
+  ) {
+
+    return "north-west";
+
+  }
+
+
+  // TÂY ←
+
+  if (
+    angle >= 157.5 &&
+    angle < 202.5
+  ) {
+
+    return "left";
+
+  }
+
+
+  // TÂY NAM ↙
+
+  if (
+    angle >= 202.5 &&
+    angle < 247.5
+  ) {
+
+    return "south-west";
+
+  }
+
+
+  // NAM ↓
+
+  if (
+    angle >= 247.5 &&
+    angle < 292.5
+  ) {
+
+    return "backward";
+
+  }
+
+
+  // ĐÔNG NAM ↘
+
+  if (
+    angle >= 292.5 &&
+    angle < 337.5
+  ) {
+
+    return "south-east";
+
+  }
+
+
+  // ĐÔNG →
+
+  if (
+    angle >= 337.5 ||
+    angle < 22.5
+  ) {
+
+    return "right";
+
+  }
+
+
+  // ĐÔNG BẮC ↗
+
+  return "north-east";
+
+}
+
+
+
+// ==================================================
+// DI CHUYỂN JOYSTICK
+// ==================================================
+
+function moveJoystick(
+  clientX,
+  clientY
+) {
+
+
+  const rect =
+    joystick.getBoundingClientRect();
+
+
+  const centerX =
+    rect.left +
+    rect.width / 2;
+
+
+  const centerY =
+    rect.top +
+    rect.height / 2;
+
+
+  let x =
+    clientX -
+    centerX;
+
+
+  let y =
+    clientY -
+    centerY;
+
+
+  // Giới hạn joystick
+
+  const maxDistance =
+    rect.width * 0.30;
+
+
+  let distance =
+    Math.sqrt(
+      x * x +
+      y * y
+    );
+
+
+  if (
+    distance > maxDistance
+  ) {
+
+    x =
+      x / distance *
+      maxDistance;
+
+
+    y =
+      y / distance *
+      maxDistance;
+
+  }
+
+
+
+  // Di chuyển nút
+
+  knob.style.left =
+    `calc(50% + ${x}px)`;
+
+
+  knob.style.top =
+    `calc(50% + ${y}px)`;
+
+
+
+  // Xác định hướng
+
+  const direction =
+    calculateDirection(
+      x,
+      y
+    );
+
+
+
+  if (
+    direction === "stop"
+  ) {
+
+    stopCar();
+
+  }
+  else {
+
+    changeDirection(
+      direction
+    );
+
+  }
+
+}
+
+
+
+// ==================================================
+// TOUCH START
+// ==================================================
+
+joystick.addEventListener(
+
+  "touchstart",
+
+  function(event) {
+
+    event.preventDefault();
+
+    touching = true;
+
+
+    const touch =
+      event.touches[0];
+
+
+    moveJoystick(
+
+      touch.clientX,
+
+      touch.clientY
+
+    );
+
+  },
+
+  {
+    passive: false
+  }
+
+);
+
+
+
+// ==================================================
+// TOUCH MOVE
+// ==================================================
+
+joystick.addEventListener(
+
+  "touchmove",
+
+  function(event) {
+
+    event.preventDefault();
+
+
+    if (!touching) {
+
+      return;
+
+    }
+
+
+    const touch =
+      event.touches[0];
+
+
+    moveJoystick(
+
+      touch.clientX,
+
+      touch.clientY
+
+    );
+
+  },
+
+  {
+    passive: false
+  }
+
+);
+
+
+
+// ==================================================
+// TOUCH END
+// ==================================================
+
+joystick.addEventListener(
+
+  "touchend",
+
+  function(event) {
+
+    event.preventDefault();
+
+    touching = false;
+
+    stopCar();
+
+  },
+
+  {
+    passive: false
+  }
+
+);
+
+
+
+// ==================================================
+// MOUSE START
+// ==================================================
+
+joystick.addEventListener(
+
+  "mousedown",
+
+  function(event) {
+
+    touching = true;
+
+
+    moveJoystick(
+
+      event.clientX,
+
+      event.clientY
+
+    );
+
+  }
+
+);
+
+
+
+// ==================================================
+// MOUSE MOVE
+// ==================================================
+
+document.addEventListener(
+
+  "mousemove",
+
+  function(event) {
+
+    if (!touching) {
+
+      return;
+
+    }
+
+
+    moveJoystick(
+
+      event.clientX,
+
+      event.clientY
+
+    );
+
+  }
+
+);
+
+
+
+// ==================================================
+// MOUSE RELEASE
+// ==================================================
+
+document.addEventListener(
+
+  "mouseup",
+
+  function() {
+
+    if (!touching) {
+
+      return;
+
+    }
+
+
+    touching = false;
+
+    stopCar();
+
+  }
+
+);
+
+
+
+// ==================================================
+// RỜI TRANG → STOP
+// ==================================================
+
+window.addEventListener(
+
+  "beforeunload",
+
+  function() {
+
+    navigator.sendBeacon(
+      "/stop"
+    );
+
+  }
+
+);
+
+
 </script>
 
+
 </body>
+
 </html>
